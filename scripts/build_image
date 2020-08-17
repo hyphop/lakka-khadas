@@ -234,4 +234,6 @@ gzip -dc $IMG | dd skip=64 seek=64 count=$((OF-64)) of=$IMAGE conv=notrunc,sync
 }
 file $IMAGE
 
+pigz -9c $IMAGE > $IMAGE.gz
+
 #mcopy -i Lakka-RK3399.arm-3.0-devel-20200810230443-bdbe11a-khadas-edge.img@@$((32768*512)) -s :: 1
