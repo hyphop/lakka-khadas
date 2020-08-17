@@ -1,0 +1,43 @@
+#!/bin/sh
+
+IN="$1"
+
+[ "$IN" ] || \
+    IN=Edge_Ubuntu-gnome-focal_Linux-5.7_arm64_SD-USB_V0.9.1-20200602.img
+
+[ "$BOARD" ] || BOARD=Edge
+
+case $IN in
+    Edge*)
+    BOARD=Edge
+    ;;
+    VIM3l*|VIM3L*)
+    BOARD=VIM3L
+    ;;
+    VIM3*)
+    BOARD=VIM3
+    ;;
+    VIM2*)
+    BOARD=VIM2
+    ;;
+    *)
+    BOARD=VIM1
+    ;;
+esac
+
+
+echo "+ $IN"
+
+    ./xze "$IN" -9 -f \
+	-M \
+	\##KRESCUE_META## \
+	label=UBUNTU \
+	image="${IN%.*}" \
+	builder=khadas \
+	date="$(TZ= date)" \
+	match=BOARD=$BOARD \
+	link=http://dl.khadas.com/ \
+	duration=60 \
+	desc="Ubuntu focal-fossa 20.04 gnome + LINUX kernel 5.7 for Khadas EDGE board aarch64...." \
+	\##KRESCUE-META## \
+	\##KRESCUE##END
