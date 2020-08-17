@@ -1,0 +1,34 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= build lakka for edge
+
+FAIL(){
+    echo "[e] $@">&2
+    exit 1
+}
+
+REPO=Lakka-LibreELEC
+
+(
+cd ../
+
+[ -d "$REPO" ] || {
+    git clone https://github.com/hyphop/$REPO || FAIL git
+    git checkout edge
+}
+
+cd $REPO
+
+# sudo apt-get install texinfo
+
+export PROJECT=Rockchip
+export DEVICE=RK3399
+export ARCH=arm 
+export UBOOT_SYSTEM=khadas-edge
+
+make image || FAIL make lakka
+)
+
+./scripts/build_image

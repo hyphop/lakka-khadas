@@ -1,0 +1,237 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= build lakka for edge
+
+. $(dirname "$0")/build.lib
+
+Label=Lakka
+VER="test"
+
+STORAGE_LIST="
+    ../files/content/LAKKA_STORAGE
+    ../files/content/LAKKA_STORAGE.resize
+    ../files/content/LAKKA_STORAGE.roms
+    ../files/content/LAKKA_STORAGE.mini
+"
+
+[ "$DEVICE" ] || {
+    DEVICE=RK3399
+    BOARD=Edge
+}
+
+[ "$ML" = "1" ] && \
+UBOOT_TYPE=mainline
+
+echo "[i] build $Label for $BOARD ::"
+echo "[i] paths $PATH"
+
+REPO=Lakka-LibreELEC
+
+for IMG in $(ls "$DR/../../$REPO/target/$Label-$DEVICE"*.img.gz | sort -r ); do
+    [ -s "$IMG" ] && break
+done
+
+[ -s "$IMG" ] || FAIL "/../../$REPO/target/*.img.gz src image not found"
+
+for IMG_ in $(ls "$DR/../../$REPO/target/$Label-$DEVICE"*.tar | sort -r ); do
+    [ -s "$IMG_" ] && break
+done
+
+[ -s "$IMG_" ] || FAIL "/../../$REPO/target/*.tar src image not found"
+
+echo "[i] build from $IMG_"
+
+#exit 0
+
+OUT="$TMP/lakka.build"
+
+BOOT="$OUT/boot"
+STORAGE="$OUT/storage"
+mkdir -p "$DOWNLOADS"
+
+[ -d "$BOOT" ] && rm -rf $BOOT
+
+mkdir -p "$BOOT" || FAIL mkdir $BOOT
+mkdir -p "$STORAGE" || FAIL mkdir $STORAGE
+
+tar --list -f "$IMG_"
+#rm
+## KERNET SYSTEM
+tar -C"$BOOT" \
+    --wildcards \
+    --strip-components=2 \
+    -xf "$IMG_" \
+    '*/target/*'
+
+tar -C"$BOOT" \
+    --wildcards \
+    --strip-components=3 \
+    -xf "$IMG_" \
+    '*/3rdparty/bootloader/*khadas*.dtb'
+
+UBOOT_FILE=Edge.u-boot.mmc.64.bin
+../scripts/download \
+    https://github.com/krescue/khadas-uboot/releases/download/0.1/$UBOOT_FILE || FAIL download uboot
+
+UBOOT_="$DOWNLOADS/$UBOOT_FILE"
+
+
+F="$OUT"/lakka.img.fat
+E="$OUT"/lakka.img.ext
+
+IMAGE="$OUT/$BOARD.$Label.$VER.sd.img"
+
+PART1_SIZE=500
+export PART1_LABEL=LAKKA_BOOT
+
+PART2_SIZE=100
+export PART2_LABEL=LAKKA_STORAGE
+
+OF=32768
+BS=512
+
+for DTB in $(ls "$BOOT"/*.dtb) "" ; do
+    [ -f "$DTB" ] && break
+done
+
+export DTB_FILE=/$(basename "$DTB")
+
+echo "DTB: $DTB_FILE"
+
+mkdir "$BOOT"/extlinux
+
+extlinux_tpl=../files/edge/extlinux/extlinux.conf.tpl
+
+[ -s "$extlinux_tpl" ] || FAIL extlinux tpl
+
+sh $extlinux_tpl | tee "$BOOT/extlinux/extlinux.conf"
+cp ../files/logo/splash.bmp "$BOOT" || FAIL copy logo
+
+(
+echo "LABEL: LAKKA"
+echo "DATE: $(date)"
+echo "BUILDER: hyphop"
+) | tee $F.msg
+
+CMD $dd if=/dev/zero bs=1M count=$((PART1_SIZE)) of="$F"
+CMD $mkfs_vfat -n $PART1_LABEL -i DEADBEEF -m $F.msg $F
+#CMD $mdir -i $F ::
+
+(
+cd $BOOT
+CMD $mcopy -sp -i $F $(ls --group-directories-first .) :: 
+) || FAIL copy file to fat
+
+CMD $mdir -i $F ::
+
+rm $IMAGE
+
+CMD $dd if=$F bs=$BS seek=$((OF)) of=$IMAGE 2>/dev/null
+
+echo "label:dos" | $sfdisk -q $IMAGE || FAIL 1
+echo "$OF, " | $sfdisk -q $IMAGE -a || FAIL 2
+sfdisk --part-type $IMAGE 1 e  || FAIL 3
+
+
+STORAGE_SPACE=0
+
+for D in $STORAGE_LIST ; do
+
+for SPACE in $(du -s -b -L "$D"); do
+    break
+done
+
+STORAGE_SPACE=$((STORAGE_SPACE+SPACE))
+
+echo "[i] ADD SPACE $SPACE -- total $STORAGE_SPACE"
+
+done
+
+M=$((1024*1024))
+
+CMD $dd if=/dev/zero bs=1M count=$((PART2_SIZE+STORAGE_SPACE/M)) > $E
+CMD $mkfs_ext -L $PART2_LABEL $E
+
+#e2cp -s ../files/content/LAKKA_STORAGE/. $E:/ || FAIL copy storage content
+
+populatefs=$(which populatefs)
+DEBUGFS=$(which debugfs)
+e2cp=$(which e2cp)
+e2mkdir=$(which e2mkdir)
+e2ln=$(which e2ln)
+
+
+(
+echo "COPY STORAGE"
+
+for D in $STORAGE_LIST ; do
+
+echo "[+] $D"
+
+[ "$populatefs" ] && {
+
+    echo $populatefs -U -d "$D" "$E"
+    $populatefs -U -d "$D" "$E" || FAIL populate fs via populatefs
+    continue
+}
+
+[ "$DEBUGFS" ] && {
+    DEBUGFS=$DEBUGFS \
+	"$DA"/populate-extfs.sh "$D" "$E" || FAIL populate fs via debugfs
+    continue
+}
+
+[ "$e2cp" ] && {
+
+cd $D
+
+find -type d  | while read d ; do
+    [ "$d" = "." ] && continue
+    d=${d#./}
+    echo "mkdir $d"
+    $e2mkdir -v "$E:/$d"
+done
+
+find -type f  | while read d ; do
+    d=${d#./}
+    echo "cp $d"
+    $e2cp -v "$d" "$E:/$d"
+done
+
+find -type l  | while read d ; do
+    d=${d#./}
+    l=$(readlink "$d")
+    echo "ln $d -> $l"
+    $e2ln -v -s  "$l" "$E:/$d"
+done
+
+
+cd -
+
+}
+
+done
+
+)
+
+e2ls -a $E
+
+cat "$E" >> $IMAGE
+echo "$OF, " | $sfdisk -q $IMAGE -a || FAIL 4
+
+[ "$UBOOT_TYPE" = "mainline" ] && {
+echo "[i] write mainline uboot"
+dd if=$UBOOT_ seek=64 of=$IMAGE conv=notrunc,sync
+}
+
+# copy rk uboot
+RK_BOOT_OFFSET=64
+[ "$UBOOT_TYPE" = "mainline" ] || {
+echo "[i] write rk uboot"
+gzip -dc $IMG | dd skip=64 seek=64 count=$((OF-64)) of=$IMAGE conv=notrunc,sync
+}
+file $IMAGE
+
+#mcopy -i Lakka-RK3399.arm-3.0-devel-20200810230443-bdbe11a-khadas-edge.img@@$((32768*512)) -s :: 1

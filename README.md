@@ -1,7 +1,7 @@
-# lakka-khadas-edge
+# lakka-khadas
 
 ```
-git clone https://github.com/hyphop/lakka-khadas-edge.git
-cd lakka-khadas-edge
+git clone https://github.com/hyphop/lakka-khadas.git
+cd lakka-khadas
 build
 ```

@@ -1,0 +1,19 @@
+{
+  "version": "1.4",
+  "default_core_path": "",
+  "default_core_name": "",
+  "label_display_mode": 0,
+  "right_thumbnail_mode": 0,
+  "left_thumbnail_mode": 0,
+  "sort_mode": 0,
+  "items": [
+    {
+      "path": "/storage/roms/downloads/lutor-khadas/main.lua",
+      "label": "lutor-khadas",
+      "core_path": "/tmp/cores/lutro_libretro.so",
+      "core_name": "Lua Engine (Lutro)",
+      "crc32": "DETECT",
+      "db_name": "Lutro.lpl"
+    }
+  ]
+}
