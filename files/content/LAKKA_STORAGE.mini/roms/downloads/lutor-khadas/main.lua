@@ -146,13 +146,16 @@ function love.load()
 --    PWD=io.popen"pwd":read'*l'
 --    print(package.path)
 
-    CWD = script_path()
-
+    CWD = script_path() or ''
     help_text  = help_text1:upper()
     help_text2 = help_text2:upper()
     help_text3 = help_text3:upper()
 
     print ("CWD: " .. CWD .. "--")
+
+    if love.timer.getFPS then
+	FPSYES=1
+    end
 
 --    print (io.popen"env":read'*l')
 
@@ -245,7 +248,7 @@ function love.update(dt)
     t=t+1
 
     if 0 == ( t % 30) then
-	FPS = tostring(love.timer.getFPS())
+
 
 	os_temp=filestring("/sys/class/thermal/thermal_zone0/temp","0")
 	os_temp=math.floor(os_temp/1000)
@@ -255,7 +258,9 @@ function love.update(dt)
 
 
     if 0 == ( t % 60) then
-	FPS = tostring(love.timer.getFPS())
+	if FPSYES then
+	FPS = tostring(love.timer.getFPS() )
+	end
 	os_uptime=filestring("/proc/uptime","0"):match"(%d+)"
     end
 

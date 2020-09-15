@@ -7,6 +7,9 @@
 . $(dirname "$0")/build.lib
 
 Label=Lakka
+LABEL=LAKKA
+label=lakka
+
 VER="test"
 
 STORAGE_LIST="
@@ -126,6 +129,7 @@ CMD $mcopy -sp -i $F $(ls --group-directories-first .) ::
 
 CMD $mdir -i $F ::
 
+[ -s $IMAGE ] && \
 rm $IMAGE
 
 CMD $dd if=$F bs=$BS seek=$((OF)) of=$IMAGE 2>/dev/null
@@ -234,6 +238,12 @@ gzip -dc $IMG | dd skip=64 seek=64 count=$((OF-64)) of=$IMAGE conv=notrunc,sync
 }
 file $IMAGE
 
-pigz -9c $IMAGE > $IMAGE.gz
+#pigz -9c $IMAGE > $IMAGE.gz
 
-#mcopy -i Lakka-RK3399.arm-3.0-devel-20200810230443-bdbe11a-khadas-edge.img@@$((32768*512)) -s :: 1
+$DA/xze "$IMAGE" -3 -f \
+    --meta \
+    LABEL=$LABEL \
+    BOARD=$BOARD \
+    BUILDER=hyphop \
+    LINK=http://dl.khadas.com/ \
+    DESC="Lakka game console for Khadas $BOARD board aarch64...." \

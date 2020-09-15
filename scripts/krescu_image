@@ -2,8 +2,7 @@
 
 IN="$1"
 
-[ "$IN" ] || \
-    IN=Edge_Ubuntu-gnome-focal_Linux-5.7_arm64_SD-USB_V0.9.1-20200602.img
+[ "$IN" ] || exit
 
 [ "$BOARD" ] || BOARD=Edge
 
@@ -28,16 +27,16 @@ esac
 
 echo "+ $IN"
 
-    ./xze "$IN" -9 -f \
+    ./xze "$IN" -3 -f \
 	-M \
 	\##KRESCUE_META## \
-	label=UBUNTU \
+	label=$LABEL \
 	image="${IN%.*}" \
-	builder=khadas \
+	builder=hyphop \
 	date="$(TZ= date)" \
 	match=BOARD=$BOARD \
 	link=http://dl.khadas.com/ \
 	duration=60 \
-	desc="Ubuntu focal-fossa 20.04 + LINUX kernel 5.7 for Khadas EDGE board aarch64...." \
+	desc="$LABEL game console for Khadas $BOARD board aarch64...." \
 	\##KRESCUE-META## \
 	\##KRESCUE##END
