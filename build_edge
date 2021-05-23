@@ -10,13 +10,14 @@ FAIL(){
 }
 
 REPO=Lakka-LibreELEC
+BRANCH=origin/Lakka-v3.0
 
 (
 cd ../
 
 [ -d "$REPO" ] || {
     git clone https://github.com/hyphop/$REPO || FAIL git
-    git checkout edge
+    git checkout $BRANCH
 }
 
 cd $REPO
@@ -25,10 +26,10 @@ cd $REPO
 
 export PROJECT=Rockchip
 export DEVICE=RK3399
-export ARCH=arm 
+export ARCH=arm
 export UBOOT_SYSTEM=khadas-edge
 
 make image || FAIL make lakka
 )
 
-./scripts/build_image
+#./scripts/build_image
