@@ -1,1 +1,0 @@
-README-lakka-khadas-edge-rk3399.txt

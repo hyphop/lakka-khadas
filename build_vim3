@@ -27,8 +27,9 @@ cd $REPO
 
 export PROJECT=Amlogic
 export DEVICE=AMLG12
-export ARCH=arm 
+export ARCH=aarch64
 export UBOOT_SYSTEM=
+export KHADAS=1
 
 make image || FAIL make lakka
 
