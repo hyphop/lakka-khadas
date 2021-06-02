@@ -1,4 +1,0 @@
-LABEL Lakka
-  LINUX /KERNEL
-  FDT /rk3399-khadas-edge.dtb
-  APPEND boot=UUID=1108-2647 disk=UUID=7385e24e-d711-41ce-8046-a8987625000d quiet console=uart8250,mmio32,0xff1a0000 console=tty0 video=HDMI-A-1:1920x1080@60

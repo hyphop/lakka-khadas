@@ -10,7 +10,7 @@ Label=Lakka
 LABEL=LAKKA
 label=lakka
 
-VER="test"
+VER="3.0"
 
 STORAGE_LIST="
     ../files/content/LAKKA_STORAGE
@@ -19,10 +19,11 @@ STORAGE_LIST="
     ../files/content/LAKKA_STORAGE.mini
 "
 
-[ "$DEVICE" ] || {
+[ "$DEVICE" ] || \
     DEVICE=RK3399
+
+[ "$BOARD" ] || \
     BOARD=Edge
-}
 
 [ "$ML" = "1" ] && \
 UBOOT_TYPE=mainline
@@ -32,11 +33,13 @@ echo "[i] paths $PATH"
 
 REPO=Lakka-LibreELEC
 
+#[ "" ] && {
 for IMG in $(ls "$DR/../../$REPO/target/$Label-$DEVICE"*.img.gz | sort -r ); do
     [ -s "$IMG" ] && break
 done
 
 [ -s "$IMG" ] || FAIL "/../../$REPO/target/*.img.gz src image not found"
+#}
 
 for IMG_ in $(ls "$DR/../../$REPO/target/$Label-$DEVICE"*.tar | sort -r ); do
     [ -s "$IMG_" ] && break
@@ -74,9 +77,41 @@ tar -C"$BOOT" \
     -xf "$IMG_" \
     '*/3rdparty/bootloader/*khadas*.dtb'
 
-UBOOT_FILE=Edge.u-boot.mmc.64.bin
+#[ "" ] && {
+
+UBOOT_TYPE=mainline
+UBOOT_REL=0.11
+
+case $BOARD in
+    VIM*)
+    UBOOT_FILE=$BOARD.u-boot.sd.bin
+    ;;
+    Edge)
+    UBOOT_FILE=$BOARD.u-boot.mmc.64.bin
+    UBOOT_FILE=$BOARD.u-boot.sd.bin
+    ;;
+esac
+
+case $BOARD in
+    VIM1)
+    export DTB_FILE=/dtb/amlogic/meson-gxl-s905x-khadas-vim.dtb
+    ;;
+    VIM2)
+    export DTB_FILE=/dtb/amlogic/meson-gxm-khadas-vim2.dtb
+    ;;
+    Edge)
+    export DTB_FILE=/dtb/rockchip/rk3399-khadas-edge-v.dtb
+    ;;
+esac
+
+[ "$DTB_FILE" ] && {
+    export FDT="# FDT $DTB_FILE"
+}
+
 ../scripts/download \
-    https://github.com/krescue/khadas-uboot/releases/download/0.1/$UBOOT_FILE || FAIL download uboot
+    https://github.com/khadas/khadas-uboot/releases/download/$UBOOT_REL/$UBOOT_FILE || FAIL download uboot
+
+#}
 
 UBOOT_="$DOWNLOADS/$UBOOT_FILE"
 
@@ -84,7 +119,10 @@ UBOOT_="$DOWNLOADS/$UBOOT_FILE"
 F="$OUT"/lakka.img.fat
 E="$OUT"/lakka.img.ext
 
-IMAGE="$OUT/$BOARD.$Label.$VER.sd.img"
+[ "$SUF" ] || \
+    SUF=sd.mmc.img
+
+IMAGE="$OUT/$BOARD.$Label.$VER.$SUF"
 
 PART1_SIZE=500
 export PART1_LABEL=LAKKA_BOOT
@@ -95,22 +133,44 @@ export PART2_LABEL=LAKKA_STORAGE
 OF=32768
 BS=512
 
-for DTB in $(ls "$BOOT"/*.dtb) "" ; do
-    [ -f "$DTB" ] && break
-done
+#for DTB in $(ls "$BOOT"/*.dtb 2>/dev/null ) $(ls "$BOOT"/dtb/*.dtb 2>/dev/null) "" ; do
+#    [ -f "$DTB" ] && break
+#done
 
-export DTB_FILE=/$(basename "$DTB")
+#export DTB_FILE=/$(basename "$DTB")
 
 echo "DTB: $DTB_FILE"
 
 mkdir "$BOOT"/extlinux
 
-extlinux_tpl=../files/edge/extlinux/extlinux.conf.tpl
+[ -d "$BOOT"/dtb/amlogic ] || {
+    mkdir -p "$BOOT"/dtb/amlogic
+    mv "$BOOT"/dtb/*.dtb "$BOOT"/dtb/amlogic
+}
 
-[ -s "$extlinux_tpl" ] || FAIL extlinux tpl
+[ -d "$BOOT"/dtb/rockchip ] || {
+    mkdir -p "$BOOT"/dtb/rockchip
+    mv "$BOOT"/*.dtb "$BOOT"/dtb/rockchip
+
+}
+
+cp "$BOOT"/dtb/rockchip/rk3399-khadas-edge.dtb \
+    "$BOOT"/dtb/rockchip/rk3399-khadas-edge-v.dtb
+
+extlinux_tpl=../files/$PROJECT/extlinux/extlinux.conf.tpl
+
+[ -s "$extlinux_tpl" ] || FAIL extlinux tpl $extlinux_tpl
 
 sh $extlinux_tpl | tee "$BOOT/extlinux/extlinux.conf"
 cp ../files/logo/splash.bmp "$BOOT" || FAIL copy logo
+
+grep KERNEL.gz "$BOOT/extlinux/extlinux.conf" && {
+    [ -f "$BOOT"/KERNEL ] && {
+    dd if="$BOOT"/KERNEL bs=64 skip=1 | lzop -dc | gzip -9c > "$BOOT"/KERNEL.gz
+    rm -f "$BOOT"/KERNEL
+    rm -f "$BOOT"/KERNEL.md5
+    }
+}
 
 (
 echo "LABEL: LAKKA"
@@ -225,25 +285,45 @@ e2ls -a $E
 cat "$E" >> $IMAGE
 echo "$OF, " | $sfdisk -q $IMAGE -a || FAIL 4
 
-[ "$UBOOT_TYPE" = "mainline" ] && {
-echo "[i] write mainline uboot"
-dd if=$UBOOT_ seek=64 of=$IMAGE conv=notrunc,sync
-}
-
 # copy rk uboot
 RK_BOOT_OFFSET=64
+
+[ "$UBOOT_TYPE" = "mainline" ] && {
+echo "[i] write mainline uboot"
+
+case $BOARD in
+    VIM*)
+    dd if=$UBOOT_ bs=444 count=1 of=$IMAGE conv=notrunc,sync
+    dd if=$UBOOT_ skip=1 seek=1 of=$IMAGE conv=notrunc,sync
+    ;;
+    Edge)
+    #dd if=$UBOOT_ seek=64 of=$IMAGE conv=notrunc,sync
+    dd if=$UBOOT_ seek=64 skip=64 of=$IMAGE conv=notrunc,sync
+    ;;
+esac
+
+}
+
+
 [ "$UBOOT_TYPE" = "mainline" ] || {
+
 echo "[i] write rk uboot"
 gzip -dc $IMG | dd skip=64 seek=64 count=$((OF-64)) of=$IMAGE conv=notrunc,sync
+
 }
+
 file $IMAGE
 
 #pigz -9c $IMAGE > $IMAGE.gz
 
-$DA/xze "$IMAGE" -3 -f \
+[ "$CMP_ARGS" ] || \
+    CMP_ARGS="-3"
+
+[ "$NO_CMP" ] || \
+$DA/xze "$IMAGE" $CMP_ARGS -f \
     --meta \
     LABEL=$LABEL \
     BOARD=$BOARD \
     BUILDER=hyphop \
     LINK=http://dl.khadas.com/ \
-    DESC="Lakka game console for Khadas $BOARD board aarch64...." \
+    DESC="Lakka game console for Khadas $BOARD board $ARCH" \
