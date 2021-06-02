@@ -9,10 +9,16 @@
   "items": [
     {
       "path": "/storage/roms/downloads/lutor-khadas/main.lua",
-      "label": "lutor-khadas",
+      "label": "Device Info / Test",
       "core_path": "/tmp/cores/lutro_libretro.so",
       "core_name": "Lua Engine (Lutro)",
-      "crc32": "DETECT",
+      "db_name": "Lutro.lpl"
+    },
+    {
+      "path": "/storage/roms/downloads/lutor-benchmark/main.lua",
+      "label": "COVID-19 benchmark",
+      "core_path": "/tmp/cores/lutro_libretro.so",
+      "core_name": "Lua Engine (Lutro)",
       "db_name": "Lutro.lpl"
     }
   ]
