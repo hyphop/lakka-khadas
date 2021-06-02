@@ -11,6 +11,17 @@ FAIL(){
 
 REPO=Lakka-LibreELEC
 BRANCH=origin/Lakka-v3.0
+BRANCH=origin/edge-v3-new
+
+export PROJECT=Rockchip
+export DEVICE=RK3399
+export ARCH=arm
+export UBOOT_SYSTEM=khadas-edge
+export BOARD=Edge
+
+export NO_CORES="mesen picodrive"
+
+echo "NO_CORES: $NO_CORES"
 
 (
 cd ../
@@ -23,13 +34,25 @@ cd ../
 cd $REPO
 
 # sudo apt-get install texinfo
+P=picodrive
+P=mrboom
+P=mame2015
+P=gpsp
 
-export PROJECT=Rockchip
-export DEVICE=RK3399
-export ARCH=arm
-export UBOOT_SYSTEM=khadas-edge
+#scripts/build $P || FAIL boom
 
 make image || FAIL make lakka
-)
 
-#./scripts/build_image
+) || exit 
+
+#exit 0
+
+(
+[ "$CMP_ARGS" ] || \
+    CMP_ARGS=-8
+export CMP_ARGS=$CMP_ARGS
+export SUF=pre.$ARCH.sd.emmc.img
+export UBOOT_TYPE=mainline
+cd scripts
+./build_image
+)
