@@ -23,6 +23,7 @@ key_pressed = ''
 p=0
 
 require("conf")
+require("config")
 
 board="Edge"
 
@@ -187,7 +188,8 @@ function love.load()
     print(string.format("OS : %s HOST: %s  DEV: %s MEM: %s - %s \n", os_version, os_hostname, os_device, os_mem_total, os_mem_free))
     print(string.format("CMD: %s \n", os_cmdline))
 
-    bg_music=love.audio.newSource("assets/bg_music.wav","stream")
+--    bg_music=love.audio.newSource("assets/bg_music.wav","stream")
+    bg_music=love.audio.newSource("assets/bg_music.ogg","stream")
     press_key2_sound=love.audio.newSource("assets/coffee.wav","stream")
     press_key_sound=love.audio.newSource("assets/select.wav","stream")
 
@@ -236,37 +238,163 @@ end
 FPS=".."
 os_uptime=0
 
+function actionPress(a)
+	print ( "ACTION:" .. a )
+	p=p+1
+	key_pressed = a
+
+	if a == "start" then
+        START_PRESSED = START_PRESSED + 1
+	end
+
+	if a == "X" then
+        d1=d1*-1
+	end
+
+	if a == "Y" then
+        d2=d2*-1
+	end
+
+	press_key_sound:play()
+
+end
+
+keychange = {}
+
+function updateKeys()
+
+    -- Check keyboard keys
+--[[
+    for action, key in pairs(config.keys) do
+	if love.keyboard.isDown(key) then
+	    keystate[action] = true
+	else
+	    keystate[action] = false
+	end
+    end
+]]
+
+    -- Check joystick axes
+    if love.joystick.getJoystickCount() > 0 then
+
+    if loveis then
+	-- print ("Love")
+	local joystick = love.joystick.getJoysticks()[1]
+	if joystick then
+	    for action, key in pairs(config.pads) do
+		if joystick:isDown(key) then
+		    if not keystate[action] then
+			print (action,key)
+			keystate[action] = true
+		    end
+		else
+		    keystate[action] = false
+		end
+	    end
+	else
+	    --print ("NO JOY")
+	end
+	--    print("love end")
+	-- return
+	-- loveis
+    else
+--	print("lutro")
+
+    local joystick = love.joystick
+    for action, key in pairs(config.pads) do
+	if joystick.isDown(1, key) then
+	    if not keystate[action] then
+		actionPress(action)
+	    end
+
+	    keystate[action] = true
+	else
+	    keystate[action] = false
+	end
+    end
+
+    end
+
+    end
+
+end
+
+loadConfig()
+
+local quit = false
+
+--function love.keypressed(key, unicode)
+--    print(key)
+--end
+
+t2=0
 function love.update(dt)
 --    Game:update()
 
-    if START_PRESSED > 2 then
-	love.window.close()
+    if quit then
+	return
     end
 
-    x=x+xx
-    y=y+yy
-    t=t+1
+    updateKeys()
 
-    if 0 == ( t % 30) then
+    if keystate.left then
+	xx=-1
+    end
+    if keystate.right then
+	xx=1
+    end
+    if keystate.up then
+	yy=-1
+    end
+    if keystate.down then
+	yy=1
+    end
 
+    if keystate.select then
+	if not SELECT_TR then
+	    SELECT_TR=true
+	    if PAUSED then
+		PAUSED = false
+	    else 
+		PAUSED = true
+	    end
+	end
+    else
+	SELECT_TR=false
+    end
 
+    if START_PRESSED > 2 then
+        print("BYBY ")
+	quit=true
+	love.event.quit()
+    end
+
+    t2=t2+1
+
+    if 0 == ( t2 % 30) then
 	os_temp=filestring("/sys/class/thermal/thermal_zone0/temp","0")
 	os_temp=math.floor(os_temp/1000)
-
 --	print("FPS " .. FPS) 
     end
 
-
-    if 0 == ( t % 60) then
+    if 0 == ( t2 % 60) then
 	if FPSYES then
 	FPS = tostring(love.timer.getFPS() )
 	end
 	os_uptime=filestring("/proc/uptime","0"):match"(%d+)"
     end
 
-    if 0 == ( t % 90) then
+    if 0 == ( t2 % 90) then
 	free_mem()
     end
+
+    if PAUSED then
+	return
+    end
+
+    t=t+1
+    x=x+xx
+    y=y+yy
 
     if x < 0 then
 	xx = xx * -1
@@ -312,6 +440,8 @@ function love.draw()
 
 
       love.graphics.setFont(fontb)
+	--love.getVersion
+
       love.graphics.printf("SYS: " .. os_hostname , 0, 20 + math.sin(t/4)*1.5, WIDTH, "center" )
       love.graphics.printf( os_version, 0, 40, WIDTH, "center" )
       love.graphics.printf( "DEVICE: " .. os_device, 0 + math.sin(t/16)*4, 60, WIDTH, "center" )
@@ -344,125 +474,25 @@ function love.draw()
 
 end
 
-function love.joystickpressed(i, key)
+--function love.joystickpressed(i, key)
 
 --  p=p+1
 --  key_pressed=key
-    print("JOY "..key)
-
-end
+--    print("JOY "..key)
+--
+--end
 
 START_PRESSED=0
 
-function love.gamepadpressed(i, key)
+--function love.gamepadpressed(i, key)
 
-    p=p+1
-    key_pressed=key
-    print("PAD "..key)
+--    p=p+1
+--    key_pressed=key
+--    print("PAD "..key)
 
-    if key == 'start' then
-	press_key_sound:play()
-	START_PRESSED = START_PRESSED + 1
-	return
-    end
+--end
 
-
-    if key == 'up' then
-	yy=-1
-    press_key_sound:play()
-	return
-    end
-    if key == 'down' then
-	yy=1
-    press_key_sound:play()
-	return
-    end
-    if key == 'left' then
-	xx=-1
-    press_key_sound:play()
-	return
-    end
-    if key == 'right' then
-	xx=1
-    press_key_sound:play()
-	return
-    end
-
-    if key == 'a' then
-	d2=d2*-1
-    end
-
-    if key == 'b' then
-	d2=d2*-1
-    end
-
-    if key == 'x' then
-	d1=d1*-1
-    end
-
-    if key == 'y' then
-	d1=d1*-1
-    end
-
-    press_key2_sound:play()
-
---[[
-    if key == 'a' then
-	return
-    if key == 'b' then
-	return
-    if key == 'up' then
-	return
-    if key == 'down' then
-	return
-    if key == 'left' then
-	return
-    if key == 'right' then
-	return
-    if key == 'start' then
-	return
-    if key == 'y' then
-	return
-    if key == 'x' then
-	return
-
-]]
-
-end
-
-function love.gamepadreleased(i, k)
+--function love.gamepadreleased(i, k)
     -- body
-end
+--end
 
-function love.keypressed(key, unicode)
-    print("KEYP "..key)
-
-    if not loveis then
-	return
-    end
-
-    p=p+1
-    key_pressed=key
-
-    print("PAD "..key)
-
---    press_key_sound:play()
-
-    if key == 'up' then
-	yy=-1
-    end
-    if key == 'down' then
-	yy=1
-    end
-    if key == 'left' then
-	xx=-1
-    end
-    if key == 'right' then
-	xx=1
-    end
-
-end
-
-function love.keyreleased(key)
-    print("UNPRESS "..key)
-end

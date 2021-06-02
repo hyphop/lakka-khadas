@@ -2,6 +2,7 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -24,38 +25,79 @@
      id="defs2">
     <linearGradient
        inkscape:collect="always"
-       id="linearGradient20-3">
+       id="linearGradient2300">
       <stop
-         style="stop-color:#000080;stop-opacity:1"
+         style="stop-color:#ffffff;stop-opacity:1"
          offset="0"
-         id="stop16" />
+         id="stop2296" />
       <stop
-         id="stop4537"
-         offset="0.23917875"
-         style="stop-color:#006a00;stop-opacity:1" />
+         id="stop2308"
+         offset="0.23294705"
+         style="stop-color:#ff00ff;stop-opacity:1" />
       <stop
-         style="stop-color:#18a293;stop-opacity:1"
-         offset="0.47253543"
-         id="stop822" />
+         id="stop2304"
+         offset="0.51578212"
+         style="stop-color:#00ffff;stop-opacity:0.48235294;" />
       <stop
-         style="stop-color:#9e0080;stop-opacity:1"
-         offset="0.82257044"
-         id="stop4541" />
+         style="stop-color:#ffff00;stop-opacity:1"
+         offset="0.86944962"
+         id="stop2306" />
       <stop
-         style="stop-color:#000080;stop-opacity:1"
+         style="stop-color:#00ff00;stop-opacity:1"
          offset="1"
-         id="stop18" />
+         id="stop2298" />
     </linearGradient>
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#Wavy"
+       id="pattern2266"
+       patternTransform="matrix(0.83359234,0,0,1.89,190.51986,-388.21709)" />
+    <pattern
+       inkscape:stockid="Wavy"
+       id="Wavy"
+       height="5.1805778"
+       width="30.066020"
+       patternUnits="userSpaceOnUse"
+       inkscape:collect="always">
+      <path
+         id="path2172"
+         d="M 7.597,0.061 C 5.079,-0.187 2.656,0.302 -0.01,1.788 L -0.01,3.061 C 2.773,1.431 5.173,1.052 7.472,1.280 C 9.770,1.508 11.969,2.361 14.253,3.218 C 18.820,4.931 23.804,6.676 30.066,3.061 L 30.062,1.788 C 23.622,5.497 19.246,3.770 14.691,2.061 C 12.413,1.207 10.115,0.311 7.597,0.061 z "
+         style="fill:black;stroke:none;" />
+    </pattern>
+    <linearGradient
+       id="linearGradient824"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#ffff00;stop-opacity:1;"
+         offset="0"
+         id="stop822" />
+    </linearGradient>
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#Wavy-6"
+       id="pattern2266-3"
+       patternTransform="matrix(0.83359235,0,0,1.89,182.09296,-533.54677)" />
+    <pattern
+       inkscape:stockid="Wavy"
+       id="Wavy-6"
+       height="5.1805778"
+       width="30.066020"
+       patternUnits="userSpaceOnUse"
+       inkscape:collect="always">
+      <path
+         id="path2172-7"
+         d="M 7.597,0.061 C 5.079,-0.187 2.656,0.302 -0.01,1.788 L -0.01,3.061 C 2.773,1.431 5.173,1.052 7.472,1.280 C 9.770,1.508 11.969,2.361 14.253,3.218 C 18.820,4.931 23.804,6.676 30.066,3.061 L 30.062,1.788 C 23.622,5.497 19.246,3.770 14.691,2.061 C 12.413,1.207 10.115,0.311 7.597,0.061 z "
+         style="fill:black;stroke:none;" />
+    </pattern>
     <linearGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient20-3"
-       id="linearGradient4539"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.97267253,0,0,0.97987749,1.0508339,4.3622043)"
-       x1="50.702381"
-       y1="221.91815"
-       x2="50.702381"
-       y2="273.1611" />
+       xlink:href="#linearGradient2300"
+       id="linearGradient2302"
+       x1="131.93227"
+       y1="248.73308"
+       x2="24.521912"
+       y2="249.37051"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -64,9 +106,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="-99.918999"
-     inkscape:cy="-97.729059"
+     inkscape:zoom="1.6602604"
+     inkscape:cx="188.97638"
+     inkscape:cy="13.021122"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -87,7 +129,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -97,11 +139,38 @@
      id="layer1"
      transform="translate(-25,-222)">
     <rect
-       style="fill:url(#linearGradient4539);fill-opacity:1;stroke:none;stroke-width:0.25830433"
-       id="rect14"
-       width="600"
-       height="50"
-       x="25"
-       y="222" />
+       style="opacity:1;fill:url(#linearGradient2302);fill-opacity:1;stroke:none;stroke-width:7.12901306;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.74901961"
+       id="rect2268"
+       width="120.99431"
+       height="82.703224"
+       x="6.2901783"
+       y="213.71811"
+       inkscape:export-filename="./rect2268.png"
+       inkscape:export-xdpi="162.56"
+       inkscape:export-ydpi="162.56" />
+    <rect
+       style="opacity:0.36000001;fill:url(#pattern2266);fill-opacity:1;stroke:none;stroke-width:9.41388702;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.74901961"
+       id="rect820"
+       width="82.235367"
+       height="107.15625"
+       x="212.6199"
+       y="22.278564"
+       transform="matrix(0,1,1,0,0,0)"
+       ry="0"
+       inkscape:export-filename="./rect820.png"
+       inkscape:export-xdpi="162.56"
+       inkscape:export-ydpi="162.56" />
+    <rect
+       style="opacity:0.181;fill:url(#pattern2266-3);fill-opacity:1;stroke:none;stroke-width:9.41388798;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.74901961"
+       id="rect820-5"
+       width="82.235374"
+       height="107.15625"
+       x="204.19321"
+       y="-123.05116"
+       transform="rotate(90)"
+       ry="0"
+       inkscape:export-filename="./rect820.png"
+       inkscape:export-xdpi="162.56"
+       inkscape:export-ydpi="162.56" />
   </g>
 </svg>

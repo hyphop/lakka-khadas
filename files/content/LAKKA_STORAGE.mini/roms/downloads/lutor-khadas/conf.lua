@@ -23,10 +23,15 @@ function love.conf(t)
     t.window.vsync = true
     t.window.usedpiscale = true
 
+--    t.window.fullscreen = true
+--    t.window.fullscreentype = "desktop"
+
     t.window.width = WIDTH
     t.window.height = HEIGHT
+    t.modules.joystick = true
 
     end
+
 
     t.width = WIDTH
     t.height = HEIGHT
