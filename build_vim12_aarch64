@@ -1,0 +1,65 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= build lakka for edge
+
+FAIL(){
+    echo "[e] $@">&2
+    exit 1
+}
+
+
+REPO=Lakka-LibreELEC
+BRANCH=origin/Lakka-v3.0
+BRANCH=origin/edge-v3-new
+
+[ "$BOARD" ] || \
+    BOARD=VIM1
+
+export PROJECT=Amlogic
+export DEVICE=AMLGX
+export ARCH=aarch64
+export UBOOT_SYSTEM=khadas-vim
+export KHADAS=2
+export BOARD=$BOARD
+
+echo "[i] BOARD $BOARD ARCH $ARCH"
+
+(
+cd ../
+
+[ -d "$REPO" ] || {
+    git clone https://github.com/hyphop/$REPO || FAIL git
+    git checkout $BRANCH
+}
+
+cd $REPO
+
+# sudo apt-get install texinfo
+
+
+P=mame2015
+P=flycast
+P=parallel-n64
+P=mupen64plus_next
+P=picodrive
+P=mame2015
+P=fbneo
+
+#scripts/build $P || exit
+
+make image || FAIL make lakka
+
+)
+
+(
+
+[ "$CMP_ARGS" ] || \
+    CMP_ARGS=-7
+export CMP_ARGS=$CMP_ARGS
+export SUF=pre.$ARCH.sd.emmc.img
+export UBOOT_TYPE=mainline
+cd scripts
+./build_image
+)
